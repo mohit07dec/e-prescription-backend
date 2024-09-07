@@ -29,28 +29,27 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
-      @PostMapping("/signup")
-      public ResponseEntity<?> signup(@RequestBody User user) {
-          try {
-              userService.registerUser(user);
-              return new ResponseEntity<>("Registered successfully", HttpStatus.OK);
-          } catch (IllegalArgumentException e) {
-              return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-          } catch (Exception e) {
-              return new ResponseEntity<>("Registration failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-          }
-      }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody User user) {
+        try {
+            userService.registerUser(user);
+            return new ResponseEntity<>("Registered successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Registration failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
-        try{
+        try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserName());
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
             String jwt = jwtUtil.generateToken(userDetails.getUsername());
             return new ResponseEntity<>(jwt, HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>("Incorrect username or password", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Incorrect email or password", HttpStatus.BAD_REQUEST);
         }
     }
 }
