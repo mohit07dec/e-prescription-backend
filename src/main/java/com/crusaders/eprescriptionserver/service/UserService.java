@@ -18,6 +18,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public void registerUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }

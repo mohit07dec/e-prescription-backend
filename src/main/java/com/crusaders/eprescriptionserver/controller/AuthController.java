@@ -29,12 +29,17 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
-
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody User user) {
-        userService.registerUser(user);
-        return new ResponseEntity<>("Registered", HttpStatus.OK);
-    }
+      @PostMapping("/signup")
+      public ResponseEntity<?> signup(@RequestBody User user) {
+          try {
+              userService.registerUser(user);
+              return new ResponseEntity<>("Registered successfully", HttpStatus.OK);
+          } catch (IllegalArgumentException e) {
+              return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+          } catch (Exception e) {
+              return new ResponseEntity<>("Registration failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+      }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
