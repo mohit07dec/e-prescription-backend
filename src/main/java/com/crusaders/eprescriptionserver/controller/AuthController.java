@@ -34,7 +34,7 @@ public class AuthController {
                         .body(Map.of("message", "User already exists, you can login", "success", false));
             }
 
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            user.setPassword(user.getPassword().trim());
             userService.registerUser(user);
 
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -49,7 +49,18 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody User user) {
         try {
             User existingUser = userService.findByEmail(user.getEmail());
-            if (existingUser == null || !bCryptPasswordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+            System.out.println("Existing user: " + existingUser); // Log the existing user
+
+            if (existingUser == null) {
+                System.out.println("User not found"); // Log if user is not found
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Auth failed email or password is wrong", "success", false));
+            }
+
+            boolean passwordMatches = bCryptPasswordEncoder.matches(user.getPassword(), existingUser.getPassword());
+            System.out.println("Password matches: " + passwordMatches); // Log if password matches
+
+            if (!passwordMatches) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("message", "Auth failed email or password is wrong", "success", false));
             }
@@ -65,6 +76,7 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace(); // Log the full stack trace
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Internal server error", "success", false));
         }
